@@ -18,18 +18,18 @@ First, to train SHAM wtih 64 bits on MIRFLICKR-25K, just run trainSHAM.py as fol
 python trainSHAM.py --datasets mirflickr25k --output_shape 64 --gama 1 --available_num 100
 ```
 
-Then, to train a model for image modelity wtih 64 bits on MIRFLICKR-25K, just run main_DCHN.py as follows:
+Then, to train a model for image modality wtih 64 bits on MIRFLICKR-25K, just run main_DCHN.py as follows:
 ```bash
-python main_DCHN.py --epochs 100 --view 0 --datasets mirflickr25k --output_shape 64 --alpha 0.02 --gama 1 --available_num 100 --gpu_id 0 --mode train
+python main_DCHN.py --mode train --epochs 100 --view 0 --datasets mirflickr25k --output_shape 64 --alpha 0.02 --gama 1 --available_num 100 --gpu_id 0
 ```
 For text modality:
 ```bash
-python main_DCHN.py --epochs 100 --view 1 --datasets mirflickr25k --output_shape 64 --alpha 0.02 --gama 1 --available_num 100 --gpu_id 1 --mode train
+python main_DCHN.py --mode train --epochs 100 --view 1 --datasets mirflickr25k --output_shape 64 --alpha 0.02 --gama 1 --available_num 100 --gpu_id 1
 ```
 
 To evaluate the trained models, you could run main_DCHN.py as follows:
 ```bash
-python main_DCHN.py --view -1 --datasets mirflickr25k --output_shape 64 --alpha 0.02 --gama 1 --available_num 100 --mode eval --num_workers 0
+python main_DCHN.py --mode eval --view -1 --datasets mirflickr25k --output_shape 64 --alpha 0.02 --gama 1 --available_num 100 --num_workers 0
 ```
 
 ## Comparison with the State-of-the-Art
