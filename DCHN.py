@@ -9,7 +9,6 @@ import data_loader
 from torch.autograd import Variable
 import scipy.io as sio
 import torch.utils.data as data
-import torchvision.transforms as transforms
 import math
 from MHN import MHN
 
@@ -24,39 +23,20 @@ class Solver(object):
         self.multiprocessing = config.multiprocessing
         self.available_num = config.available_num
         self.view = config.view
-        (self.data, self.labels, self.train_inx, self.test_inx, self.retrieval_inx) = data_loader.load_data(self.datasets, self.view)
+        (self.data, self.labels, self.train_inx, self.test_inx, self.retrieval_inx, train_transforms, test_transforms) = data_loader.load_data(self.datasets, self.view)
         self.n_view = len(self.data)
         num_workers = self.args.num_workers
-        train_transforms, test_transforms = [None for v in range(5)], [None for v in range(5)]
-        if 'raw' in self.datasets:
-            train_transforms[0] = transforms.Compose([
-                lambda x: np.ndarray.astype(x, dtype='uint8'),
-                transforms.ToPILImage(),
-                # transforms.RandomHorizontalFlip(),
-                # transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-            ])
-            test_transforms[0] = transforms.Compose([
-                lambda x: np.ndarray.astype(x, dtype='uint8'),
-                transforms.ToPILImage(),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-            ])
-
         self.models, self.train_dataloader, self.retrieval_dataloader, self.query_dataloader = [], [], [], []
         for v in range(self.n_view):
             view = v if self.view < 0 else self.view
-            train_dataset = data_loader.NDataset(self.data[v], self.train_inx[v], self.labels[v], transform=train_transforms[view])
+            train_dataset = data_loader.NDataset(self.data[v], self.train_inx[v], self.labels[v], transform=train_transforms[v])
             self.train_dataloader.append(data.DataLoader(train_dataset, batch_size=config.batch_sizes[view], shuffle=True, num_workers=num_workers, drop_last=False))
             self.models.append(MHN(config, self.train_dataloader[v], view))
 
-            retrieval_dataset = data_loader.NDataset(self.data[v], self.retrieval_inx[v], self.labels[v], transform=test_transforms[view])
+            retrieval_dataset = data_loader.NDataset(self.data[v], self.retrieval_inx[v], self.labels[v], transform=test_transforms[v])
             self.retrieval_dataloader.append(data.DataLoader(retrieval_dataset, batch_size=config.batch_sizes[view], shuffle=False, num_workers=num_workers, drop_last=False))
 
-            test_dataset = data_loader.NDataset(self.data[v], self.test_inx[v], self.labels[v], transform=test_transforms[view])
+            test_dataset = data_loader.NDataset(self.data[v], self.test_inx[v], self.labels[v], transform=test_transforms[v])
             self.query_dataloader.append(data.DataLoader(test_dataset, batch_size=config.batch_sizes[view], shuffle=False, num_workers=num_workers, drop_last=False))
 
     def getDevice(self, v):
