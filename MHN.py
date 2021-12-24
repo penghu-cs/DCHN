@@ -115,19 +115,21 @@ class MHN(object):
 
         model_params = []
         for name, params in self.model.named_parameters():
-            if 'vgg19' in name:
+            if 'vgg' in name:
                 model_params += [{'params': [params], 'lr': self.lr * 1e-1}]
                 pass
             else:
                 model_params += [{'params': [params]}]
         optimizer = optim.Adam(model_params, self.lr, [self.beta1, self.beta2])
-        discriminator_losses, losses, valid_results = [], [], []
+
+        losses = []
         W = torch.tensor(self.W, requires_grad=False).cuda(cuda_id).float()
         criterion = lambda x, y, la: self.criterion(x, y, la, W)
         batch_count = len(self.train_dataloader)
 
         for epoch in range(self.epochs):
             print(('\nView ID: %d, Epoch %d/%d') % (self.view, epoch + 1, self.epochs))
+            self.model.train()
             mean_loss = []
             # for batch_idx in range(batch_count):
             for batch_idx, (train_x, train_lab) in enumerate(self.train_dataloader):
@@ -160,6 +162,7 @@ class MHN(object):
 
     def eval(self, eval_dataloader, cuda_id):
         self.model = self.model.cuda(cuda_id)
+        self.model.eval()
         ret, lab = utils.predict(lambda x: self.model(x)[-1].view([x.shape[0], -1]), eval_dataloader, cuda_id=cuda_id)
         return (ret > 0) * 2 - 1, lab
 
