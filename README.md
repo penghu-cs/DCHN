@@ -603,7 +603,7 @@ python main_DCHN.py --mode eval --view -1 --datasets mirflickr25k --output_shape
 </table>
 
 ## Citation
-If you find MRL useful in your research, please consider citing:
+If you find DCHN useful in your research, please consider citing:
 ```
 @article{hu2021joint,
   author={Hu, Peng and Peng, Xi and Zhu, Hongyuan and Lin, Jie and Zhen, Liangli and Peng, Dezhong},
