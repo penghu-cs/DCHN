@@ -4,6 +4,7 @@ import os
 from PIL import Image
 from torch.utils.data.dataset import Dataset
 import numpy as np
+import torchvision.transforms as transforms
 
 class NDataset(Dataset):
     def __init__(self, data, inx, labels=None, transform=None, is_path=False, root='./'):
@@ -34,52 +35,58 @@ class NDataset(Dataset):
 
 def load_data(data_name, view):
     if 'xmedia' in data_name.lower():
-        data, labels, train_inx, query_inx, retrieval_inx = loadXMedia()
+        data, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform = loadXMedia()
         if view >= 0:
-            data, labels, train_inx, query_inx, retrieval_inx = [data[view]], [labels[view]], [train_inx[view]], [query_inx[view]], [retrieval_inx[view]]
+            data, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform = [data[view]], [labels[view]], [train_inx[view]], [query_inx[view]], [retrieval_inx[view]], [train_transform[view]], [test_transform[view]]
     elif view == 0:
-        data, labels, train_inx, query_inx, retrieval_inx = load_img(data_name)
-        data, labels, train_inx, query_inx, retrieval_inx = [data], [labels], [train_inx], [query_inx], [retrieval_inx]
+        data, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform = load_img(data_name)
+        data, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform = [data], [labels], [train_inx], [query_inx], [retrieval_inx], [train_transform], [test_transform]
     elif view == 1:
-        data, labels, train_inx, query_inx, retrieval_inx = load_txt(data_name)
-        data, labels, train_inx, query_inx, retrieval_inx = [data], [labels], [train_inx], [query_inx], [retrieval_inx]
+        data, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform = load_txt(data_name)
+        data, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform = [data], [labels], [train_inx], [query_inx], [retrieval_inx], [train_transform], [test_transform]
     elif view == -1:
         img = load_img(data_name)
         txt = load_txt(data_name)
-        data, labels, train_inx, query_inx, retrieval_inx = [img[0], txt[0]], [img[1], txt[1]], [img[2], txt[2]], [img[3], txt[3]], [img[4], txt[4]]
+        data, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform = [img[0], txt[0]], [img[1], txt[1]], [img[2], txt[2]], [img[3], txt[3]], [img[4], txt[4]], [img[5], txt[5]], [img[6], txt[6]]
     else:
         # TODO
         raise RuntimeError('Undefined view!')
 
-    return data, labels, train_inx, query_inx, retrieval_inx
+    return data, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform
 
 
 def load_labels(data_name):
     if data_name == 'nus_wide_tc21':
-        root = '../../DeepMDA/datasets/NUS-WIDE-TC21/'
+        root = '../datasets/NUS-WIDE-TC21/'
         train_size = 10500
         query_size = 2100
         labels = sio.loadmat(root + 'nus-wide-tc21-lall-clean.mat')['LAll']
         train_labels = labels[query_size: query_size + train_size]
+    elif data_name == 'nus_wide_tc21_raw':
+        root = '../datasets/NUS-WIDE-TC21/'
+        train_size = 10500
+        query_size = 2100
+        labels = sio.loadmat(root + 'nus-wide-tc21-lall.mat')['LAll']
+        train_labels = labels[query_size: query_size + train_size]
     elif data_name == 'mirflickr25k':
-        root = '../../DeepMDA/datasets/MIRFLICKR25K/'
+        root = '../datasets/MIRFLICKR25K/'
         labels = sio.loadmat(root + 'mirflickr25k-lall-rand.mat')['LAll']
         train_size = 10000
         query_size = 2000
         train_labels = labels[query_size: query_size + train_size]
     elif data_name == 'mirflickr25k_raw':
-        root = '../../DeepMDA/datasets/MIRFLICKR25K/'
+        root = '../datasets/MIRFLICKR25K/'
         train_size = 10000
         query_size = 2000
         labels = sio.loadmat(root + 'mirflickr25k-lall.mat')['LAll']
         train_labels = labels[query_size: query_size + train_size]
     elif data_name == 'IAPR-TC12':
         train_size = 10000
-        file_path = '../../DeepMDA/datasets/IAPR-TC12/iapr-tc12.mat'
+        file_path = '../datasets/IAPR-TC12/iapr-tc12.mat'
         data = sio.loadmat(file_path)
         train_labels = data['databaseL'][0: train_size]
     elif data_name == 'MSCOCO_doc2vec':
-        path = '../../DeepMDA/datasets/MSCOCO/MSCOCO_deep_doc2vec_data.h5py'
+        path = '../datasets/MSCOCO/MSCOCO_deep_doc2vec_data.h5py'
         data = h5py.File(path)
         labels = np.concatenate([data['train_imgs_labels'][()], data['test_imgs_labels'][()]], axis=0)
         train_size = 10000
@@ -96,38 +103,74 @@ def load_labels(data_name):
 
 def load_img(data_name):
     import numpy as np
+    train_transform, test_transform = None, None
     if data_name == 'nus_wide_tc21':
-        root = '../../DeepMDA/datasets/NUS-WIDE-TC21/'
+        root = '../datasets/NUS-WIDE-TC21/'
         train_size = 10500
         query_size = 2100
         data_img = sio.loadmat(root + 'nus-wide-tc21-xall-vgg-clean.mat')['XAll'].astype('float32')
         labels = sio.loadmat(root + 'nus-wide-tc21-lall-clean.mat')['LAll']
 
-    elif data_name == 'nus_wide_tc10':
-        root = '../../DeepMDA/datasets/NUS-WIDE-TC10/'
-        # inx = sio.loadmat(root + 'nus-wide-tc21-param.mat')['param'][()]
+    elif data_name == 'nus_wide_tc21_raw':
+        root = '../datasets/NUS-WIDE-TC21/'
         train_size = 10500
         query_size = 2100
-        data_img = sio.loadmat(root + 'nus-wide-tc10-xall-vgg.mat')['XAll'].astype('float32')
-        labels = sio.loadmat(root + 'nus-wide-tc10-lall.mat')['LAll']
+        data_img = sio.loadmat(root + 'nus-wide-tc21-iall.mat')['IAll'].astype('float32')
+        labels = sio.loadmat(root + 'nus-wide-tc21-lall.mat')['LAll']
+
+        train_transform = transforms.Compose([
+            lambda x: np.ndarray.astype(x, dtype='uint8'),
+            transforms.ToPILImage(),
+            transforms.RandomHorizontalFlip(),
+            # transforms.Resize(256),
+            # transforms.CenterCrop(224),
+            transforms.RandomCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+        test_transform = transforms.Compose([
+            lambda x: np.ndarray.astype(x, dtype='uint8'),
+            transforms.ToPILImage(),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
 
     elif data_name == 'mirflickr25k':
-        root = '../../DeepMDA/datasets/MIRFLICKR25K/'
+        root = '../datasets/MIRFLICKR25K/'
         data_img = sio.loadmat(root + 'mirflickr25k-iall-vgg-rand.mat')['XAll'].astype('float32')
         labels = sio.loadmat(root + 'mirflickr25k-lall-rand.mat')['LAll']
         train_size = 10000
         query_size = 2000
 
     elif data_name == 'mirflickr25k_raw':
-        root = '../../DeepMDA/datasets/MIRFLICKR25K/'
+        root = '../datasets/MIRFLICKR25K/'
         train_size = 10000
         query_size = 2000
         data_img = h5py.File(root + 'mirflickr25k-iall.mat', 'r')['IAll']
         labels = sio.loadmat(root + 'mirflickr25k-lall.mat')['LAll']
 
+        train_transform = transforms.Compose([
+            lambda x: np.ndarray.astype(np.transpose(x, (2, 1, 0)), dtype='uint8'),
+            transforms.ToPILImage(),
+            transforms.RandomHorizontalFlip(),
+            # transforms.Resize(256),
+            # transforms.CenterCrop(224),
+            transforms.RandomCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+        test_transform = transforms.Compose([
+            lambda x: np.ndarray.astype(np.transpose(x, (2, 1, 0)), dtype='uint8'),
+            transforms.ToPILImage(),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+
     elif data_name == 'IAPR-TC12':
         train_size = 10000
-        file_path = '../../DeepMDA/datasets/IAPR-TC12/iapr-tc12.mat'
+        file_path = '../datasets/IAPR-TC12/iapr-tc12.mat'
         data = sio.loadmat(file_path)
         retrieval_img = data['VDatabase'].astype('float32')
         retrieval_labels = data['databaseL']
@@ -138,7 +181,7 @@ def load_img(data_name):
         labels = np.concatenate([query_labels, retrieval_labels])
 
     elif data_name == 'MSCOCO_doc2vec':
-        path = '../../DeepMDA/datasets/MSCOCO/MSCOCO_deep_doc2vec_data.h5py'
+        path = '../datasets/MSCOCO/MSCOCO_deep_doc2vec_data.h5py'
         data = h5py.File(path)
         data_img = np.concatenate([data['train_imgs_deep'][()], data['test_imgs_deep'][()]], axis=0)
         labels = np.concatenate([data['train_imgs_labels'][()], data['test_imgs_labels'][()]], axis=0)
@@ -149,19 +192,27 @@ def load_img(data_name):
     train_inx = inx[query_size: query_size + train_size]
     query_inx = inx[0: query_size]
     retrieval_inx = inx[query_size::]
-    return data_img, labels, train_inx, query_inx, retrieval_inx
+    return data_img, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform
 
 def load_txt(data_name):
     import numpy as np
+    train_transform, test_transform = None, None
     if data_name == 'nus_wide_tc21':
-        root = '../../DeepMDA/datasets/NUS-WIDE-TC21/'
+        root = '../datasets/NUS-WIDE-TC21/'
         train_size = 10500
         query_size = 2100
         data_txt = sio.loadmat(root + 'nus-wide-tc21-yall-clean.mat')['YAll'].astype('float32')
         labels = sio.loadmat(root + 'nus-wide-tc21-lall-clean.mat')['LAll']
 
+    elif data_name == 'nus_wide_tc21_raw':
+        root = '../datasets/NUS-WIDE-TC21/'
+        train_size = 10500
+        query_size = 2100
+        data_txt = sio.loadmat(root + 'nus-wide-tc21-yall.mat')['YAll'].astype('float32')
+        labels = sio.loadmat(root + 'nus-wide-tc21-lall.mat')['LAll']
+
     elif data_name == 'nus_wide_tc10':
-        root = '../../DeepMDA/datasets/NUS-WIDE-TC10/'
+        root = '../datasets/NUS-WIDE-TC10/'
         # inx = sio.loadmat(root + 'nus-wide-tc21-param.mat')['param'][()]
         train_size = 10500
         query_size = 2100
@@ -169,14 +220,14 @@ def load_txt(data_name):
         labels = sio.loadmat(root + 'nus-wide-tc10-lall.mat')['LAll']
 
     elif data_name == 'mirflickr25k':
-        root = '../../DeepMDA/datasets/MIRFLICKR25K/'
+        root = '../datasets/MIRFLICKR25K/'
         data_txt = sio.loadmat(root + 'mirflickr25k-yall-rand.mat')['YAll'].astype('float32')
         labels = sio.loadmat(root + 'mirflickr25k-lall-rand.mat')['LAll']
         train_size = 10000
         query_size = 2000
 
     elif data_name == 'mirflickr25k_raw':
-        root = '../../DeepMDA/datasets/MIRFLICKR25K/'
+        root = '../datasets/MIRFLICKR25K/'
         train_size = 10000
         query_size = 2000
         data_txt = sio.loadmat(root + 'mirflickr25k-yall.mat')['YAll'].astype('float32')
@@ -184,7 +235,7 @@ def load_txt(data_name):
 
     elif data_name == 'IAPR-TC12':
         train_size = 10000
-        file_path = '../../DeepMDA/datasets/IAPR-TC12/iapr-tc12.mat'
+        file_path = '../datasets/IAPR-TC12/iapr-tc12.mat'
         data = sio.loadmat(file_path)
         retrieval_txt = data['YDatabase'].astype('float32')
         retrieval_labels = data['databaseL']
@@ -195,7 +246,7 @@ def load_txt(data_name):
         labels = np.concatenate([query_labels, retrieval_labels])
 
     elif data_name == 'MSCOCO_doc2vec':
-        path = '../../DeepMDA/datasets/MSCOCO/MSCOCO_deep_doc2vec_data.h5py'
+        path = '../datasets/MSCOCO/MSCOCO_deep_doc2vec_data.h5py'
         data = h5py.File(path)
         data_txt = np.concatenate([data['train_text'][()], data['test_text'][()]], axis=0).astype('float32')
         labels = np.concatenate([data['train_imgs_labels'][()], data['test_imgs_labels'][()]], axis=0)
@@ -205,11 +256,11 @@ def load_txt(data_name):
     train_inx = inx[query_size: query_size + train_size]
     query_inx = inx[0: query_size]
     retrieval_inx = inx[query_size::]
-    return data_txt, labels, train_inx, query_inx, retrieval_inx
+    return data_txt, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform
 
 
 def loadXMedia():
-    path = '../../DeepMDA/datasets/XMedia&Code/XMediaFeatures.mat'
+    path = '../datasets/XMedia&Code/XMediaFeatures.mat'
     # path = '../datasets/XMedia&Code/XMediaFeaturesSplit.mat'
     MAP = -1
     req_rec, b_wv_matrix = False, False
@@ -249,7 +300,7 @@ def loadXMedia():
         query_labels[v] = (query_labels[v].reshape([-1, 1]) == classes).astype('float32')
         valid_labels[v] = (valid_labels[v].reshape([-1, 1]) == classes).astype('float32')
 
-    data, labels, train_inx, query_inx, retrieval_inx = [], [], [], [], []
+    data, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform = [], [], [], [], [], [], []
     for v in range(len(train_labels)):
         data.append(np.concatenate([test_data[v], valid_data[v]]))
         labels.append(np.concatenate([query_labels[v], valid_labels[v]]))
@@ -263,4 +314,6 @@ def loadXMedia():
         train_inx.append(tr_inx)
         query_inx.append(te_inx)
         retrieval_inx.append(re_inx)
-    return data, labels, train_inx, query_inx, retrieval_inx
+        train_transform.append(None)
+        test_transform.append(None)
+    return data, labels, train_inx, query_inx, retrieval_inx, train_transform, test_transform
