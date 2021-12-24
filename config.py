@@ -17,7 +17,7 @@ parser.add_argument('--lr', type=list, default=[1e-4, 1e-4, 1e-4, 1e-4, 1e-4])
 parser.add_argument('--output_shape', type=int, default=128)
 parser.add_argument('--alpha', type=float, default=0.02) # nus_wide_tc21 16:0.02   32: 0.001   64: 0.003   128: 0.003
 parser.add_argument('--gama', type=float, default=1.)
-parser.add_argument('--datasets', type=str, default='mirflickr25k') # mirflickr25k nus_wide_tc21 MSCOCO-1, MSCOCO_doc2vec xmedia nus_wide_tc10 IAPR-TC12 wiki_doc2vec MSCOCO_bert xmedianet_full
+parser.add_argument('--datasets', type=str, default='mirflickr25k') # mirflickr25k nus_wide_tc21 MSCOCO_doc2vec xmedia IAPR-TC12
 parser.add_argument('--epochs', type=int, default=100)
 parser.add_argument('--available_num', type=int, default=0)
 parser.add_argument('--gpu_id', type=int, default=0)
