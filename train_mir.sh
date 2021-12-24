@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # train SHAM
 available_num=100
-output_shape=16
+output_shape=64
 gama=1
 # mirflickr25k nus_wide_tc21 MSCOCO_doc2vec XMedia nus_wide_tc10 IAPR-TC12
-datasets=mirflickr25k_raw
-alpha=0.005
+datasets=mirflickr25k
+alpha=0.02
 gama=1
 seed=0
 epochs=100
