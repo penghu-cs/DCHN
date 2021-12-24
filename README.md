@@ -37,7 +37,7 @@ python main_DCHN.py --mode eval --view -1 --datasets mirflickr25k --output_shape
 <thead>
   <h4>Table 1: Performance comparison in terms of MAP scores on the MIRFLICKR-25K and IAPR TC-12 datasets. The highest MAP score is shown in <b>bold</b>.</h4>
   <tr>
-    <th class="tg-0lax" rowspan="3">&nbsp;&nbsp;Method&nbsp;&nbsp;</th>
+    <th class="tg-0lax" rowspan="3">&nbsp;&nbsp;&nbsp;Method&nbsp;&nbsp;&nbsp;</th>
     <th class="tg-baqh" colspan="8">MIRFLICKR-25K</th>
     <th class="tg-baqh" colspan="8">IAPR TC-12</th>
   </tr>
@@ -322,7 +322,7 @@ python main_DCHN.py --mode eval --view -1 --datasets mirflickr25k --output_shape
 <thead>
   <h4>Table 2: Performance comparison in terms of MAP scores on the NUS-WIDE and MS-COCO datasets. The highest MAP score is shown in <b>bold</b>.</h4>
   <tr>
-    <th class="tg-0pky" rowspan="3">&nbsp;&nbsp;Method&nbsp;&nbsp;</th>
+    <th class="tg-0pky" rowspan="3">&nbsp;&nbsp;&nbsp;Method&nbsp;&nbsp;&nbsp;</th>
     <th class="tg-c3ow" colspan="8">NUS-WIDE</th>
     <th class="tg-c3ow" colspan="8">MS-COCO</th>
   </tr>
