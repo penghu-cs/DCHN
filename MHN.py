@@ -143,8 +143,7 @@ class MHN(object):
                 loss.backward()
                 optimizer.step()
                 mean_loss.append(self.to_data(loss))
-                utils.show_progressbar([batch_idx, batch_count], loss=loss)
-
+                utils.show_progressbar([batch_idx, batch_count], loss=(loss.item() if batch_idx < batch_count - 1 else np.mean(mean_loss)))
             losses.append(np.mean(mean_loss))
             utils.save_checkpoint({
                 'epoch': epoch,

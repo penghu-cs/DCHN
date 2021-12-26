@@ -62,12 +62,6 @@ def load_labels(data_name):
         query_size = 2100
         labels = sio.loadmat(root + 'nus-wide-tc21-lall-clean.mat')['LAll']
         train_labels = labels[query_size: query_size + train_size]
-    elif data_name == 'nus_wide_tc21_raw':
-        root = '../datasets/NUS-WIDE-TC21/'
-        train_size = 10500
-        query_size = 2100
-        labels = sio.loadmat(root + 'nus-wide-tc21-lall.mat')['LAll']
-        train_labels = labels[query_size: query_size + train_size]
     elif data_name == 'mirflickr25k':
         root = '../datasets/MIRFLICKR25K/'
         labels = sio.loadmat(root + 'mirflickr25k-lall-rand.mat')['LAll']
@@ -111,31 +105,6 @@ def load_img(data_name):
         data_img = sio.loadmat(root + 'nus-wide-tc21-xall-vgg-clean.mat')['XAll'].astype('float32')
         labels = sio.loadmat(root + 'nus-wide-tc21-lall-clean.mat')['LAll']
 
-    elif data_name == 'nus_wide_tc21_raw':
-        root = '../datasets/NUS-WIDE-TC21/'
-        train_size = 10500
-        query_size = 2100
-        data_img = sio.loadmat(root + 'nus-wide-tc21-iall.mat')['IAll'].astype('float32')
-        labels = sio.loadmat(root + 'nus-wide-tc21-lall.mat')['LAll']
-
-        train_transform = transforms.Compose([
-            lambda x: np.ndarray.astype(x, dtype='uint8'),
-            transforms.ToPILImage(),
-            transforms.RandomHorizontalFlip(),
-            # transforms.Resize(256),
-            # transforms.CenterCrop(224),
-            transforms.RandomCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ])
-        test_transform = transforms.Compose([
-            lambda x: np.ndarray.astype(x, dtype='uint8'),
-            transforms.ToPILImage(),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ])
-
     elif data_name == 'mirflickr25k':
         root = '../datasets/MIRFLICKR25K/'
         data_img = sio.loadmat(root + 'mirflickr25k-iall-vgg-rand.mat')['XAll'].astype('float32')
@@ -153,17 +122,17 @@ def load_img(data_name):
         train_transform = transforms.Compose([
             lambda x: np.ndarray.astype(np.transpose(x, (2, 1, 0)), dtype='uint8'),
             transforms.ToPILImage(),
-            transforms.RandomHorizontalFlip(),
+            # transforms.RandomHorizontalFlip(),
             # transforms.Resize(256),
             # transforms.CenterCrop(224),
-            transforms.RandomCrop(224),
+            # transforms.RandomCrop(224),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
         test_transform = transforms.Compose([
             lambda x: np.ndarray.astype(np.transpose(x, (2, 1, 0)), dtype='uint8'),
             transforms.ToPILImage(),
-            transforms.CenterCrop(224),
+            # transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
@@ -203,21 +172,6 @@ def load_txt(data_name):
         query_size = 2100
         data_txt = sio.loadmat(root + 'nus-wide-tc21-yall-clean.mat')['YAll'].astype('float32')
         labels = sio.loadmat(root + 'nus-wide-tc21-lall-clean.mat')['LAll']
-
-    elif data_name == 'nus_wide_tc21_raw':
-        root = '../datasets/NUS-WIDE-TC21/'
-        train_size = 10500
-        query_size = 2100
-        data_txt = sio.loadmat(root + 'nus-wide-tc21-yall.mat')['YAll'].astype('float32')
-        labels = sio.loadmat(root + 'nus-wide-tc21-lall.mat')['LAll']
-
-    elif data_name == 'nus_wide_tc10':
-        root = '../datasets/NUS-WIDE-TC10/'
-        # inx = sio.loadmat(root + 'nus-wide-tc21-param.mat')['param'][()]
-        train_size = 10500
-        query_size = 2100
-        data_txt = sio.loadmat(root + 'nus-wide-tc10-yall.mat')['YAll'][()].T.astype('float32')
-        labels = sio.loadmat(root + 'nus-wide-tc10-lall.mat')['LAll']
 
     elif data_name == 'mirflickr25k':
         root = '../datasets/MIRFLICKR25K/'

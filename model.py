@@ -38,12 +38,13 @@ class ImgNet(nn.Module):
         )
         self.norm = norm
 
-    def forward(self, x, finetune=False):
+    def forward(self, x, finetune=True):
         if finetune:
             x = self.vgg19_bn.features(x)
             x = x.view(x.size(0), -1)
             feat = self.vgg19_bn.classifier(x)
         else:
+            self.vgg19_bn = self.vgg19_bn.eval()
             with torch.no_grad():
                 x = self.vgg19_bn.features(x)
                 x = x.view(x.size(0), -1)
@@ -55,4 +56,3 @@ class ImgNet(nn.Module):
             return [feat, out4]
         else:
             return [feat, feat]
-            
