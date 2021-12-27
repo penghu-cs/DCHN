@@ -10,7 +10,6 @@ from model import Dense_Net, ImgNet
 
 class MHN(object):
     def __init__(self, config, train_dataloader, view):
-        wv_matrix = None
         self.args = config
         self.output_shape = config.output_shape
         self.seed = config.seed
